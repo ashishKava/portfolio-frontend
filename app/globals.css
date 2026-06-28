@@ -1,29 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a; /* Slate 900 */
-  --muted: #f8fafc; /* Slate 50 */
-  --muted-foreground: #64748b; /* Slate 500 */
-  --border: #e2e8f0; /* Slate 200 */
-  --primary: #0f172a; /* Slate 900 */
-  --primary-foreground: #ffffff;
-  --accent: #2563eb; /* Royal Blue */
-  --accent-muted: #eff6ff; /* Royal Blue 50 */
+  --background: #f4f8fc; /* Clean sea-mist white-blue */
+  --foreground: #081a36; /* Deep ocean navy */
+  --muted: #eaf2fa; /* Shallow-water container bg */
+  --muted-foreground: #557397; /* Slate ocean blue-grey */
+  --border: #d2e2f0; /* Light blue-grey border */
+  --primary: #081a36;
+  --primary-foreground: #f4f8fc;
+  --accent: #0284c7; /* Sky/ocean blue */
+  --accent-muted: #e0f2fe;
   --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --spotlight-color: rgba(2, 132, 199, 0.05);
+  --card-spotlight-color: rgba(2, 132, 199, 0.08);
 }
 
 .dark {
-  --background: #080c14; /* Dark slate-navy */
-  --foreground: #f8fafc; /* Slate 50 */
-  --muted: #111a2e; /* Muted dark slate */
-  --muted-foreground: #94a3b8; /* Slate 400 */
-  --border: #1e293b; /* Slate 800 */
-  --primary: #f8fafc;
-  --primary-foreground: #080c14;
-  --accent: #3b82f6; /* Bright Royal Blue */
-  --accent-muted: #0d1527;
+  --background: #030a1c; /* Deep Midnight Ocean */
+  --foreground: #e2ebf8; /* Soft blue-white */
+  --muted: #081633; /* Deep Ocean container bg */
+  --muted-foreground: #7ba0c7; /* Muted grayish blue */
+  --border: #13264d; /* Oceanic border */
+  --primary: #f0f5ff; /* Ice white */
+  --primary-foreground: #030a1c;
+  --accent: #00d2ff; /* Bioluminescent ocean cyan glow */
+  --accent-muted: #051c3d;
   --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+  --spotlight-color: rgba(0, 210, 255, 0.06);
+  --card-spotlight-color: rgba(0, 210, 255, 0.08);
 }
 
 @theme {
@@ -87,7 +91,7 @@ body {
   z-index: 1;
   background: radial-gradient(
     800px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
-    rgba(37, 99, 235, 0.05),
+    var(--spotlight-color),
     transparent 80%
   );
   transition: opacity 0.5s ease;
@@ -123,7 +127,7 @@ body {
   border-radius: inherit;
   background: radial-gradient(
     250px circle at var(--card-mouse-x, 0px) var(--card-mouse-y, 0px),
-    rgba(37, 99, 235, 0.07),
+    var(--card-spotlight-color),
     transparent 80%
   );
   opacity: 0;
@@ -191,8 +195,8 @@ body {
 }
 
 .dark .bg-grid-overlay {
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-image: linear-gradient(to right, rgba(0, 210, 255, 0.015) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0, 210, 255, 0.015) 1px, transparent 1px);
 }
 
 /* Slide in active tab effect */

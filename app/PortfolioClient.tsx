@@ -106,7 +106,7 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
     }
   };
 
-  // Interactive Drag for 3D Hero Widget
+  // Interactive Drag & Touch for 3D Hero Widget (Mobile & Desktop)
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
@@ -127,6 +127,59 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
     setIsDragging(false);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    const deltaX = e.touches[0].clientX - dragStart.x;
+    const deltaY = e.touches[0].clientY - dragStart.y;
+    setCubeRotation((prev) => ({
+      x: prev.x - deltaY * 0.5,
+      y: prev.y + deltaX * 0.5,
+    }));
+    setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Smooth auto-rotation when the 3D card is idle
+  useEffect(() => {
+    if (isDragging) return;
+
+    let animationFrameId: number;
+    let lastTime = performance.now();
+
+    const rotate = (time: number) => {
+      const delta = time - lastTime;
+      lastTime = time;
+      
+      // Rotate 12 degrees per second
+      setCubeRotation((prev) => ({
+        ...prev,
+        y: (prev.y + 0.012 * delta) % 360,
+      }));
+      
+      animationFrameId = requestAnimationFrame(rotate);
+    };
+
+    const timeoutId = setTimeout(() => {
+      lastTime = performance.now();
+      animationFrameId = requestAnimationFrame(rotate);
+    }, 1200);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      clearTimeout(timeoutId);
+    };
+  }, [isDragging]);
+
   // Mouse move handler for Card Spotlight Glow
   const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -146,7 +199,7 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
 
   return (
     <div className="min-h-screen bg-bg-custom text-fg-custom selection:bg-accent-custom selection:text-white transition-colors duration-200 bg-grid-overlay relative">
-      
+
       {/* Dynamic Cursor Spotlight background aura */}
       <div className="spotlight-bg"></div>
 
@@ -166,9 +219,8 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
                 <a
                   key={id}
                   href={`#${id}`}
-                  className={`nav-link pb-1 transition-colors duration-200 hover:text-accent-custom ${
-                    activeSection === id ? "active text-accent-custom font-bold" : "text-muted-fg"
-                  }`}
+                  className={`nav-link pb-1 transition-colors duration-200 hover:text-accent-custom ${activeSection === id ? "active text-accent-custom font-bold" : "text-muted-fg"
+                    }`}
                 >
                   {sec}
                 </a>
@@ -231,9 +283,8 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
                   key={id}
                   href={`#${id}`}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-150 ${
-                    activeSection === id ? "text-accent-custom" : "text-muted-fg hover:text-primary-custom"
-                  }`}
+                  className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-150 ${activeSection === id ? "text-accent-custom" : "text-muted-fg hover:text-primary-custom"
+                    }`}
                 >
                   {sec}
                 </a>
@@ -301,11 +352,15 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUpOrLeave}
             onMouseLeave={handleMouseUpOrLeave}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             style={{
               transform: `rotateX(${cubeRotation.x}deg) rotateY(${cubeRotation.y}deg)`,
               cursor: isDragging ? "grabbing" : "grab",
+              touchAction: "none",
             }}
-            className="w-64 h-64 sm:w-72 sm:h-72 preserve-3d border border-border-custom bg-muted-custom rounded-2xl flex flex-col justify-center items-center shadow-2xl relative transition-transform duration-100 ease-out select-none"
+            className="w-64 h-64 sm:w-72 sm:h-72 preserve-3d border border-border-custom bg-muted-custom rounded-2xl flex flex-col justify-center items-center shadow-2xl relative select-none"
           >
             {/* Front facing face */}
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center preserve-3d">
@@ -315,10 +370,7 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
               <p className="font-bold text-xs uppercase tracking-widest text-accent-custom mt-2 transform translateZ(20px)">
                 Software Engineer
               </p>
-              <div className="w-12 h-1 bg-gradient-to-r from-accent-custom to-blue-300 rounded mt-4 transform translateZ(10px)"></div>
-              <p className="text-[10px] text-muted-fg mt-6 font-mono transform translateZ(5px)">
-                [ drag to rotate board ]
-              </p>
+              <div className="w-12 h-1 bg-gradient-to-r from-accent-custom to-cyan-300 rounded mt-4 transform translateZ(10px)"></div>
             </div>
 
             {/* Subtle rotating helper orbit ring */}
@@ -345,7 +397,7 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
 
           <div className="md:col-span-2 space-y-8">
             <h2 className="text-xs uppercase tracking-widest font-mono text-accent-custom font-bold">Technical Stack</h2>
-            
+
             <div className="grid sm:grid-cols-2 gap-6">
               {[
                 { title: "Frontend Development", items: CONFIG.skills.frontend },
@@ -387,7 +439,7 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
               <div key={exp.id || idx} className="relative pl-8 group">
                 {/* Timeline Square Dot with rotating outline border */}
                 <div className="absolute -left-[4.5px] top-2.5 w-2 h-2 bg-border-custom border border-bg-custom rounded transition-all duration-350 group-hover:bg-accent-custom group-hover:scale-125 group-hover:rotate-45"></div>
-                
+
                 <div className="space-y-3 transition-transform duration-300 group-hover:translate-x-1.5">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <div>
@@ -431,11 +483,10 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
               <button
                 key={tag}
                 onClick={() => setFilterTag(tag)}
-                className={`px-3 py-1 text-2xs uppercase tracking-wider font-bold border rounded transition-colors duration-150 ${
-                  filterTag === tag
+                className={`px-3 py-1 text-2xs uppercase tracking-wider font-bold border rounded transition-colors duration-150 ${filterTag === tag
                     ? "bg-primary-custom border-primary-custom text-primary-fg"
                     : "border-border-custom text-muted-fg hover:bg-muted-custom hover:text-primary-custom"
-                }`}
+                  }`}
               >
                 {tag}
               </button>
@@ -630,10 +681,9 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
 
             {/* Status alerts */}
             {contactStatus.type !== "idle" && (
-              <div className={`p-3 rounded text-xs font-semibold ${
-                contactStatus.type === "success" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
-                contactStatus.type === "error" ? "bg-red-500/10 text-red-600 dark:text-red-400" : "text-primary-custom bg-muted-custom"
-              }`}>
+              <div className={`p-3 rounded text-xs font-semibold ${contactStatus.type === "success" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
+                  contactStatus.type === "error" ? "bg-red-500/10 text-red-600 dark:text-red-400" : "text-primary-custom bg-muted-custom"
+                }`}>
                 {contactStatus.message}
               </div>
             )}
@@ -644,7 +694,6 @@ export default function PortfolioClient({ initialProjects, initialExperiences }:
       {/* FOOTER */}
       <footer className="py-12 px-6 border-t border-border-custom bg-muted-custom text-center text-2xs text-muted-fg space-y-2 relative z-10">
         <p>&copy; {new Date().getFullYear()} {CONFIG.name}. All Rights Reserved.</p>
-        <p className="uppercase tracking-widest font-mono text-3xs">Engineered with Next.js SSR & Node.js/SQLite</p>
       </footer>
     </div>
   );
